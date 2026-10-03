@@ -4,21 +4,22 @@ const Product = require('../models/Products');
 exports.createProduct = async (req, res) => {
     try {
 
-        const { descricao, precoVenda, estoque, unidade, fotoUrl } = req.body;
+        const { idProduto, descricao, precoVenda, estoque, unidade, fotoUrl } = req.body;
         const { id: storeId } = req.user;
         const store = await Stores.findById(storeId);
 
         if (!store) {
             return res.status(404).json({ message: 'Loja não encontrada.' });
         }
-        const existingProduct = await Product.findOne({ descricao: descricao, storeId: storeId });
+        const existingProduct = await Product.findOne({ idProduto: idProduto, storeId: storeId });
         if (existingProduct) {
             return res.status(400).json({ message: 'Produto já existe nesta loja.' });
         }
-        
+
 
         const product = new Product({
             storeId: storeId,
+            idProduto: idProduto,
             descricao,
             precoVenda,
             estoque,

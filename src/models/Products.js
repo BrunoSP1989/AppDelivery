@@ -7,6 +7,10 @@ const ProductSchema = new mongoose.Schema({
         ref: 'Store',
         required: true
     },
+    idProduto: {
+        type: String,
+        required: [true, 'O ID do produto é obrigatório.']
+    },
     descricao: {
         type: String,
         required: [true, 'A descrição é obrigatória.']
