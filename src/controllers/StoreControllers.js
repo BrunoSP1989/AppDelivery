@@ -3,7 +3,7 @@ const Store = require('../models/Stores');
 
 exports.registerStore = async (req, res) => {
   try {
-    const { email,cnpj, fantasia, address, password, slug, role } = req.body;
+    const { email,cnpj,idCliente, fantasia, address, password, slug, role } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'E-mail e senha são obrigatórios.' });
@@ -19,6 +19,7 @@ exports.registerStore = async (req, res) => {
     const newStore = new Store({
       email,
       cnpj,
+      idCliente,
       fantasia,
       address,
       password: hashedPassword,
@@ -55,6 +56,7 @@ exports.getStoresById = async (req, res) => {
         id: store._id,
         email: store.email,
         cnpj: store.cnpj,
+        idCliente: store.idCliente,
         fantasia: store.fantasia,
         address: store.address,
         slug: store.slug,

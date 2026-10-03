@@ -4,25 +4,20 @@ const Product = require('../models/Products');
 exports.createProduct = async (req, res) => {
     try {
 
-        const { id, descricao, precoVenda, estoque, unidade, fotoUrl } = req.body;
+        const { descricao, precoVenda, estoque, unidade, fotoUrl } = req.body;
         const { id: storeId } = req.user;
         const store = await Stores.findById(storeId);
+
         if (!store) {
             return res.status(404).json({ message: 'Loja não encontrada.' });
         }
-        if (id) {
-            const productExists = await Product.findOne({
-                _id: id,
-                storeId: storeId
-            });
-
-            if (productExists) {
-                return res.status(409).json({ message: 'Este produto já está cadastrado nesta loja.' });
-            }
+        const existingProduct = await Product.findOne({ descricao: descricao, storeId: storeId });
+        if (existingProduct) {
+            return res.status(400).json({ message: 'Produto já existe nesta loja.' });
         }
+        
 
         const product = new Product({
-            ...(id && { _id: id }),
             storeId: storeId,
             descricao,
             precoVenda,

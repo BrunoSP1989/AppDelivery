@@ -10,6 +10,10 @@ const storeSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  idCliente:{
+    type: String,
+    required: true
+  },
   fantasia:{
     type: String,
     required: true
