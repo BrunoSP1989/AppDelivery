@@ -4,6 +4,7 @@ const authRoutes = require('./src/routes/authRoutes'); // Ajuste o caminho confo
 const app = express();
 require('dotenv').config();
 
+// app.use(express.json({ limit: '5mb' }));
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI)

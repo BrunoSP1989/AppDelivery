@@ -18,7 +18,7 @@ const ProductSchema = new mongoose.Schema({
     precoVenda: {
         type: Number,
         required: [true, 'O preço de venda é obrigatório.'],
-        min: [0.01, 'O preço de venda deve ser maior que zero.']
+        default: 0
     },
     estoque: {
         type: Number,
