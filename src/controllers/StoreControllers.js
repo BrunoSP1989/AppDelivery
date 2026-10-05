@@ -13,6 +13,8 @@ exports.registerStore = async (req, res) => {
     if (storeExists) {
       return res.status(400).json({ message: 'Este e-mail já está cadastrado.' });
     }
+    const GeneratorPasswordSync = Math.random().toString(36).slice(2, 14);
+    const passwordSync = GeneratorPasswordSync;
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -23,6 +25,7 @@ exports.registerStore = async (req, res) => {
       fantasia,
       address,
       password: hashedPassword,
+      passwordSync: passwordSync,
       slug,
       role: role || 'manager'
     });
@@ -35,7 +38,8 @@ exports.registerStore = async (req, res) => {
         id: newStore._id,
         email: newStore.email,
         cnpj: newStore.cnpj,
-        role: newStore.role
+        role: newStore.role,
+        passwordSync: newStore.passwordSync
       }
     });
 

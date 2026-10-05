@@ -158,7 +158,51 @@ exports.refreshTokenAdmin = async (req, res) => {
         return res.status(500).json({ message: 'Erro ao renovar token' });
     }
 };
+exports.loginWithCnpj = async (req, res) => {
+    try {
+        const { cnpj, password } = req.body;
 
+        const store = await Stores.findOne({ cnpj });
+        if (!store) {
+            return res.status(401).json({ message: 'CNPJ ou senha inválidos' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, store.passwordSync);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'CNPJ ou senha inválidos 2 ' });
+        }
+
+        const token = jwt.sign(
+            { id: store._id, role: store.role },
+            JWT_SECRET,
+            { expiresIn: '1d' }
+        );
+        const refreshToken = jwt.sign(
+            { id: store._id },
+            JWT_REFRESHSECRET,
+            { expiresIn: '7d' }
+        );
+        await refreshtoken.create({
+            refreshToken: refreshToken,
+            storeId: store._id
+        });
+
+        return res.status(200).json({
+            message: 'Login realizado com sucesso!',
+            token,
+            refreshToken,
+            store: {
+                id: store._id,
+                cnpj: store.cnpj,
+                role: store.role
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Erro interno no servidor' });
+    }
+};
 
 
 

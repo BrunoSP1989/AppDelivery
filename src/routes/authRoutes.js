@@ -8,6 +8,8 @@ const {authMiddleware,authMiddlewareAdmin} = require('../middlewares/authMiddlew
 
 // Rota de Login
 router.post('/login', AuthController.login);
+// Rota de Login Com CNPJ
+router.post('/login-cnpj', AuthController.loginWithCnpj);
 // Rota de Login Admin
 router.post('/login-admin', AuthController.loginAdmin);
 // Rota para criar um novo administrador

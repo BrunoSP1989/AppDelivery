@@ -26,6 +26,10 @@ const storeSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
+  passwordSync:{
+    type: String,
+    required: true
+  },
   slug:{
     type: String,
     required: true,
