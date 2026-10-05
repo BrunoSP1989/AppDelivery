@@ -3,21 +3,27 @@ const Store = require('../models/Stores');
 
 exports.registerStore = async (req, res) => {
   try {
-    const { email,cnpj,idCliente, fantasia, address, password, slug, role } = req.body;
+    const { email, cnpj, idCliente, fantasia, address, password, slug, role } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'E-mail e senha são obrigatórios.' });
     }
 
-    const storeExists = await Store.findOne({ email });
+    const storeExists = await Store.findOne({ email, idCliente });
     if (storeExists) {
-      return res.status(400).json({ message: 'Este e-mail já está cadastrado.' });
+      return res.status(400).json({ message: 'Este e-mail ou ID do cliente já está cadastrado.' });
     }
-    const GeneratorPasswordSync = Math.random().toString(36).slice(2, 14);
-    const passwordSync = GeneratorPasswordSync;
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
+    const GeneratorPasswordSync = Array.from({ length: 20 },
+      () => chars[Math.floor(Math.random() * chars.length)]).join('');
+
+    const passwordSync = GeneratorPasswordSync;
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPasswordSync = await bcrypt.hash(passwordSync, salt);
+
+
     const newStore = new Store({
       email,
       cnpj,
@@ -25,7 +31,7 @@ exports.registerStore = async (req, res) => {
       fantasia,
       address,
       password: hashedPassword,
-      passwordSync: passwordSync,
+      passwordSync: hashedPasswordSync,
       slug,
       role: role || 'manager'
     });
@@ -39,7 +45,7 @@ exports.registerStore = async (req, res) => {
         email: newStore.email,
         cnpj: newStore.cnpj,
         role: newStore.role,
-        passwordSync: newStore.passwordSync
+        passwordSync: passwordSync
       }
     });
 

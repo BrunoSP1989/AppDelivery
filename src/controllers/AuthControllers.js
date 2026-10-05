@@ -169,7 +169,7 @@ exports.loginWithCnpj = async (req, res) => {
 
         const isPasswordValid = await bcrypt.compare(password, store.passwordSync);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: 'CNPJ ou senha inválidos 2 ' });
+            return res.status(401).json({ message: 'CNPJ ou senha inválidos' });
         }
 
         const token = jwt.sign(
