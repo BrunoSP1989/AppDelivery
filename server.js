@@ -4,6 +4,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const AdminRoutes = require('./src/routes/AdminRoutes');
 const ProductsRoutes = require('./src/routes/ProductsRoutes');
 const StoreRoutes = require('./src/routes/StoresRoutes');
+const OrdersRoutes = require('./src/routes/OrdersRoutes');
 const app = express();
 require('dotenv').config();
 
@@ -18,6 +19,7 @@ app.use('/', authRoutes);
 app.use('/', AdminRoutes);
 app.use('/', ProductsRoutes);
 app.use('/', StoreRoutes);
+app.use('/', OrdersRoutes);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
