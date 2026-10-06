@@ -12,8 +12,8 @@ exports.createProduct = async (req, res) => {
     }
 
     if (!Array.isArray(productsArray) || productsArray.length === 0) {
-      return res.status(400).json({ 
-        message: 'O formato dos dados deve ser um Array de produtos não vazio.' 
+      return res.status(400).json({
+        message: 'O formato dos dados deve ser um Array de produtos não vazio.'
       });
     }
 
@@ -23,9 +23,9 @@ exports.createProduct = async (req, res) => {
       return {
         updateOne: {
           // Filtro: isolamento por loja e código do produto
-          filter: { 
-            storeId: storeId, 
-            idProduto: idProduto 
+          filter: {
+            storeId: storeId,
+            idProduto: idProduto
           },
           // Dados a serem atualizados se já existir (ou inseridos se for novo)
           update: {
@@ -49,7 +49,7 @@ exports.createProduct = async (req, res) => {
     });
 
     const result = await Product.bulkWrite(operations, { ordered: false });
-    
+
     return res.status(200).json({
       message: 'Lote de produtos processado com sucesso.',
       resumo: {
@@ -62,10 +62,30 @@ exports.createProduct = async (req, res) => {
 
   } catch (error) {
     console.error('Erro ao processar lote com bulkWrite:', error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       message: 'Erro interno ao processar o lote de produtos.',
-      details: error.message 
+      details: error.message
     });
   }
 };
 
+exports.getProductsByStore = async (req, res) => {
+  try {
+    const { id: storeId } = req.user;
+    const products = await Product.find({ storeId: storeId });
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({ message: 'Nenhum produto encontrado para esta loja.' });
+    }
+
+    return res.status(200).json(products);
+  }
+  catch (error) {
+    console.error('Erro ao buscar produtos:', error);
+
+    return res.status(500).json({
+      message: 'Erro interno ao buscar os produtos.',
+      details: error.message
+    });
+  }
+};
