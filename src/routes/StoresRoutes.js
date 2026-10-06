@@ -10,3 +10,4 @@ router.post('/register', authMiddlewareAdmin, StoreController.registerStore);
 router.post('/store-update-password/:id', authMiddleware, StoreController.updatePasswordStoreById);
 //Rota para obter informações da loja pelo ID
 router.get('/store/:id', StoreController.getStoresById);
+module.exports = router;

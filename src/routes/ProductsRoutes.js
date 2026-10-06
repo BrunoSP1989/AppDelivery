@@ -5,3 +5,4 @@ const { authMiddleware } = require('../middlewares/authMiddleware');
 
 // Rota para criar o produto
 router.post('/create-product', authMiddleware, ProductController.createProduct);
+module.exports = router;

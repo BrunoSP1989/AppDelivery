@@ -9,3 +9,4 @@ router.post('/login-admin', AuthController.loginAdmin);
 router.post('/register-admin', adminController.registerAdmin);
 // Rota do Refresh Token Admin
 router.post('/refresh-token-admin', AuthController.refreshTokenAdmin);
+module.exports = router;
