@@ -56,8 +56,8 @@ exports.registerStore = async (req, res) => {
 
 exports.getStoresById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const store = await Store.findById(id);
+    const { idCliente } = req.params;
+    const store = await Store.findOne({ idCliente });
     if (!store) {
       return res.status(404).json({ message: 'Loja não encontrada.' });
     }
@@ -66,11 +66,9 @@ exports.getStoresById = async (req, res) => {
         id: store._id,
         email: store.email,
         cnpj: store.cnpj,
-        idCliente: store.idCliente,
         fantasia: store.fantasia,
         address: store.address,
-        slug: store.slug,
-        role: store.role
+        slug: store.slug
       }
     });
   } catch (error) {
@@ -80,9 +78,9 @@ exports.getStoresById = async (req, res) => {
 
 exports.updatePasswordStoreById = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { idCliente } = req.params;
     const { oldpassword, password } = req.body;
-    const store = await Store.findById(id);
+    const store = await Store.findOne({ idCliente });
     if (!store) {
       return res.status(404).json({ message: 'Loja não encontrada.' });
     }
@@ -92,7 +90,7 @@ exports.updatePasswordStoreById = async (req, res) => {
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const updatedStore = await Store.findByIdAndUpdate(id, { password: hashedPassword }, { new: true });
+    const updatedStore = await Store.findOneAndUpdate({ idCliente }, { password: hashedPassword }, { new: true });
     if (!updatedStore) {
       return res.status(404).json({ message: 'Loja não encontrada.' });
     }

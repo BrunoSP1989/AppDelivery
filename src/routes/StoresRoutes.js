@@ -7,7 +7,7 @@ const { authMiddleware, authMiddlewareAdmin } = require('../middlewares/authMidd
 // Rota para criar a loja
 router.post('/register', authMiddlewareAdmin, StoreController.registerStore);
 // Rota para atualizar a senha do usuário
-router.post('/store-update-password/:id', authMiddleware, StoreController.updatePasswordStoreById);
+router.post('/store-update-password/:idCliente', authMiddleware, StoreController.updatePasswordStoreById);
 //Rota para obter informações da loja pelo ID
-router.get('/store/:id', StoreController.getStoresById);
+router.get('/store/:idCliente', StoreController.getStoresById);
 module.exports = router;
