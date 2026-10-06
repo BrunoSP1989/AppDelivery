@@ -1,5 +1,14 @@
 const mongoose = require('mongoose');
 
+const getPtBrDate = () => {
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).format(new Date());
+};
+
 const OrderSchema = new mongoose.Schema(
   {
     storeId: {
@@ -22,9 +31,10 @@ const OrderSchema = new mongoose.Schema(
       }
     ],
     total: { type: Number, required: true },
-    status: { type: String, default: 'PENDENTE' }
-  },
-  { timestamps: true }
+    status: { type: String, default: 'PENDENTE' },
+    data: { type: String, default: getPtBrDate }
+  }
+
 );
 
-module.exports = mongoose.model('Order', OrderSchema,'Orders');
+module.exports = mongoose.model('Order', OrderSchema, 'Orders');
