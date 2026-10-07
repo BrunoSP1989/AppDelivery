@@ -36,5 +36,5 @@ const OrderSchema = new mongoose.Schema(
   }
 
 );
-
+OrderSchema.index({ storeId: 1, status: 1 });
 module.exports = mongoose.model('Order', OrderSchema,'Orders');
