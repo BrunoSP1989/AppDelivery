@@ -32,6 +32,7 @@ exports.registerStore = async (req, res) => {
       address,
       password: hashedPassword,
       passwordSync: hashedPasswordSync,
+      active: true,
       slug,
       role: role || 'manager'
     });
@@ -68,6 +69,7 @@ exports.getStoresById = async (req, res) => {
         cnpj: store.cnpj,
         fantasia: store.fantasia,
         address: store.address,
+        active: store.active,
         slug: store.slug
       }
     });
@@ -105,5 +107,29 @@ exports.updatePasswordStoreById = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ message: 'Erro interno ao atualizar a loja.' });
+  }
+};
+
+exports.updateStatusStore = async (req, res) => {
+  try {
+    const { idCliente } = req.params;
+    const { active } = req.body;
+
+    const updatedStore = await Store.findOneAndUpdate({ idCliente }, { $set: { active } }, { new: true });
+    if (!updatedStore) {
+      return res.status(404).json({ message: 'Loja não encontrada.' });
+    }
+    return res.status(200).json({
+      message: 'Status da loja atualizado com sucesso!',
+      store: {
+        id: updatedStore._id,
+        cnpj: updatedStore.cnpj,
+        idcliente: updatedStore.idCliente,
+        fantasia: updatedStore.fantasia,
+        active: updatedStore.active
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Erro interno ao atualizar o status da loja.' });
   }
 };

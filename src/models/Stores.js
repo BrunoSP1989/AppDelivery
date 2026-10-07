@@ -30,6 +30,10 @@ const storeSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  active:{
+    type: Boolean,
+    default: true
+  },
   slug:{
     type: String,
     required: true,

@@ -22,12 +22,12 @@ exports.createProduct = async (req, res) => {
 
       return {
         updateOne: {
-          // Filtro: isolamento por loja e código do produto
+
           filter: {
             storeId: storeId,
             idProduto: idProduto
           },
-          // Dados a serem atualizados se já existir (ou inseridos se for novo)
+
           update: {
             $set: {
               descricao,
@@ -36,13 +36,12 @@ exports.createProduct = async (req, res) => {
               unidade,
               fotoUrl,
             },
-            // Dados gravados EXCLUSIVAMENTE no momento da criação
+
             $setOnInsert: {
               storeId: storeId,
               idProduto: idProduto,
             },
           },
-          // Cria o documento se não existir, atualiza se já existir
           upsert: true,
         },
       };
