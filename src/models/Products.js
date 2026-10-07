@@ -33,9 +33,8 @@ const ProductSchema = new mongoose.Schema({
         type: String,
         default: null
     }
-
-
 });
+ProductSchema.index({ storeId: 1, idProduto: 1 }, { unique: true });
 
 module.exports = mongoose.model('Product', ProductSchema, 'Product');
 
