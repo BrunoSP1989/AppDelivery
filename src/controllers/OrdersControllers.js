@@ -16,49 +16,64 @@ exports.createPublicOrder = async (req, res) => {
             return res.status(404).json({ message: 'Loja não encontrada.' });
         }
 
+        const idsProdutos = items.map((item) => String(item.idProduto));
+        const produtosCadastrados = await Product.find({
+            storeId: store.id,
+            idProduto: { $in: idsProdutos }
+        });
+
+        const mapaProdutos = new Map(
+            produtosCadastrados.map((prod) => [prod.idProduto, prod])
+        );
+
         let calculatedTotal = 0;
         const orderItems = [];
-
+        const bulkOperations = [];
 
         for (const item of items) {
+            const idStr = String(item.idProduto);
             const qtdComprada = Number(item.quantidade);
+            const produto = mapaProdutos.get(idStr);
 
-            const produtoAtualizado = await Product.findOneAndUpdate(
-                {
-                    storeId: store._id,
-                    idProduto: String(item.idProduto)
-                },
-                {
-                    $inc: { estoque: -qtdComprada }
-                },
-                { new: true }
-            );
-
-            if (!produtoAtualizado) {
+            if (!produto) {
                 return res.status(404).json({
                     message: `Produto não encontrado: ID ${item.idProduto}`
                 });
             }
 
-            const precoUnit = Number(produtoAtualizado.precoVenda);
-            if (produtoAtualizado.precoVenda === undefined || produtoAtualizado.precoVenda === null || isNaN(precoUnit)) {
+            const precoUnit = Number(produto.precoVenda);
+            if (produto.precoVenda === undefined || produto.precoVenda === null || isNaN(precoUnit)) {
                 return res.status(400).json({
-                    message: `O produto ID ${item.idProduto} (${produtoAtualizado.descricao}) não possui um preço de venda válido cadastrado.`
+                    message: `O produto ID ${item.idProduto} (${produto.descricao}) não possui um preço de venda válido cadastrado.`
                 });
             }
 
             calculatedTotal += precoUnit * qtdComprada;
 
             orderItems.push({
-                idProduto: produtoAtualizado.idProduto,
-                descricao: produtoAtualizado.descricao,
+                idProduto: produto.idProduto,
+                descricao: produto.descricao,
                 quantidade: qtdComprada,
                 precoVenda: precoUnit
             });
+
+            bulkOperations.push({
+                updateOne: {
+                    filter: {
+                        storeId: store.id,
+                        idProduto: idStr
+                    },
+                    update: {
+                        $inc: { estoque: -qtdComprada }
+                    }
+                }
+            });
         }
 
+        await Product.bulkWrite(bulkOperations, { ordered: false });
+
         const newOrder = await Order.create({
-            storeId: store._id,
+            storeId: store.id,
             idCliente: store.idCliente,
             items: orderItems,
             total: calculatedTotal
