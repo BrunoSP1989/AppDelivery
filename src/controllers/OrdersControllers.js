@@ -11,8 +11,7 @@ exports.createPublicOrder = async (req, res) => {
             || cliente.length === 0 || !cliente[0].nome
             || !cliente[0].telefone || !cliente[0].endereco
             || !cliente[0].numero || !cliente[0].bairro
-            || !cliente[0].cidade
-            || !cliente[0].estado) {
+            || !cliente[0].cidade || !cliente[0].estado) {
             return res.status(400).json({ message: 'Dados incompletos.' });
         }
 
@@ -99,6 +98,9 @@ exports.createPublicOrder = async (req, res) => {
 exports.getOrdersByStore = async (req, res) => {
     try {
         const { id: storeId } = req.user;
+        if (!storeId) {
+            return res.status(400).json({ message: 'ID da loja não fornecido.' });
+        }
 
         const orders = await Order.find({ storeId })
             .select('status total createdAt cliente.nome cliente.telefone cliente.endereco cliente.numero cliente.bairro cliente.cidade cliente.estado cliente.cep items.idProduto items.descricao items.quantidade items.precoVenda data')
@@ -110,9 +112,9 @@ exports.getOrdersByStore = async (req, res) => {
 
         return res.status(200).json(orders);
     } catch (error) {
-        console.error('Erro ao buscar pedidos 1:', error);
+        console.error('Erro ao buscar pedidos:', error);
         return res.status(500).json({
-            message: 'Erro ao buscar pedidos 2.',
+            message: 'Erro ao buscar pedidos.',
             error: error.message
         });
     }
