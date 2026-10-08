@@ -7,7 +7,12 @@ exports.createPublicOrder = async (req, res) => {
     try {
         const { storeId, items, cliente } = req.body;
 
-        if (!storeId || !Array.isArray(items) || items.length === 0 || !Array.isArray(cliente) || cliente.length === 0) {
+        if (!storeId || !Array.isArray(items) || items.length === 0 || !Array.isArray(cliente)
+            || cliente.length === 0 || !cliente[0].nome
+            || !cliente[0].telefone || !cliente[0].endereco
+            || !cliente[0].numero || !cliente[0].bairro
+            || !cliente[0].cidade
+            || !cliente[0].estado) {
             return res.status(400).json({ message: 'Dados incompletos.' });
         }
 
@@ -76,16 +81,7 @@ exports.createPublicOrder = async (req, res) => {
             storeId: store.id,
             idCliente: store.idCliente,
             items: orderItems,
-            cliente: [{
-                nome: store.nome,
-                telefone: store.telefone,
-                endereco: store.endereco,
-                numero: store.numero,
-                bairro: store.bairro,
-                cidade: store.cidade,
-                estado: store.estado,
-                cep: store.cep
-            }],
+            cliente: cliente,
             total: calculatedTotal
         });
 
