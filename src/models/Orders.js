@@ -22,6 +22,16 @@ const OrderSchema = new mongoose.Schema(
       required: true,
       index: true
     },
+    cliente: [{
+      nome: { type: String, required: true },
+      telefone: { type: String, required: true },
+      endereco: { type: String, required: true },
+      numero: { type: String, required: true },
+      bairro: { type: String, required: true },
+      cidade: { type: String, required: true },
+      estado: { type: String, required: true },
+      cep: { type: String, }
+    }],
     items: [
       {
         idProduto: { type: String, required: true },
@@ -37,4 +47,4 @@ const OrderSchema = new mongoose.Schema(
 
 );
 OrderSchema.index({ storeId: 1, status: 1 });
-module.exports = mongoose.model('Order', OrderSchema,'Orders');
+module.exports = mongoose.model('Order', OrderSchema, 'Orders');

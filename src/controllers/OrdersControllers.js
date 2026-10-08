@@ -5,9 +5,9 @@ const Order = require('../models/Orders');
 
 exports.createPublicOrder = async (req, res) => {
     try {
-        const { storeId, items } = req.body;
+        const { storeId, items, cliente } = req.body;
 
-        if (!storeId || !Array.isArray(items) || items.length === 0) {
+        if (!storeId || !Array.isArray(items) || items.length === 0 || !Array.isArray(cliente) || cliente.length === 0) {
             return res.status(400).json({ message: 'Dados incompletos.' });
         }
 
@@ -76,6 +76,16 @@ exports.createPublicOrder = async (req, res) => {
             storeId: store.id,
             idCliente: store.idCliente,
             items: orderItems,
+            cliente: [{
+                nome: store.nome,
+                telefone: store.telefone,
+                endereco: store.endereco,
+                numero: store.numero,
+                bairro: store.bairro,
+                cidade: store.cidade,
+                estado: store.estado,
+                cep: store.cep
+            }],
             total: calculatedTotal
         });
 
@@ -95,7 +105,7 @@ exports.getOrdersByStore = async (req, res) => {
         const { id: storeId } = req.user;
 
         const orders = await Order.find({ storeId })
-            .select('status total createdAt items.idProduto items.descricao items.quantidade items.precoVenda data')
+            .select('status total createdAt cliente.nome cliente.telefone cliente.endereco cliente.numero cliente.bairro cliente.cidade cliente.estado cliente.cep items.idProduto items.descricao items.quantidade items.precoVenda data')
             .lean();
 
         if (!orders || orders.length === 0) {
