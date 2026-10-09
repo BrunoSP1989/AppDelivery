@@ -22,7 +22,7 @@ const OrderSchema = new mongoose.Schema(
       required: true,
       index: true
     },
-    cliente: {
+    client: {
       nome: { type: String, required: true, trim: true },
       telefone: { type: String, required: true, trim: true },
       endereco: { type: String, required: true, trim: true },
@@ -40,8 +40,15 @@ const OrderSchema = new mongoose.Schema(
         precoVenda: { type: Number, required: true }
       }
     ],
+    PaymentMethod: {
+      type: String, enum: ['DINHEIRO', 'CARTAO_CREDITO','CARTAO_DEBITO','TICKET', 'PIX'], required: true
+    },
     total: { type: Number, required: true },
-    status: { type: String, default: 'PENDENTE' },
+    status: {
+      type: String,
+      enum: ['PENDENTE', 'EM ROTA', 'ENTREGUE', 'CANCELADO'],
+      default: 'PENDENTE'
+    },
     data: { type: String, default: getPtBrDate }
   }
 

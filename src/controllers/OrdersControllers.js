@@ -5,13 +5,12 @@ const Order = require('../models/Orders');
 
 exports.createPublicOrder = async (req, res) => {
     try {
-        const { storeId, items, cliente } = req.body;
+        const { storeId, items, client, PaymentMethod } = req.body;
 
-        if (!storeId || !Array.isArray(items) || items.length === 0 || !Array.isArray(cliente)
-            || cliente.length === 0 || !cliente.nome
-            || !cliente.telefone || !cliente.endereco
-            || !cliente.numero || !cliente.bairro
-            || !cliente.cidade || !cliente.estado) {
+        if (!storeId || !Array.isArray(items) || items.length === 0 || !client
+            || !client.nome || !client.telefone || !client.endereco
+            || !client.numero || !client.bairro
+            || !client.cidade || !client.estado || !PaymentMethod) {
             return res.status(400).json({ message: 'Dados incompletos.' });
         }
 
@@ -80,16 +79,17 @@ exports.createPublicOrder = async (req, res) => {
             storeId: store.id,
             idCliente: store.idCliente,
             items: orderItems,
-            cliente: {
-                nome: cliente.nome,
-                telefone: cliente.telefone,
-                endereco: cliente.endereco,
-                numero: cliente.numero,
-                bairro: cliente.bairro,
-                cidade: cliente.cidade,
-                estado: cliente.estado,
-                cep: cliente.cep || ''
+            client: {
+                nome: client.nome,
+                telefone: client.telefone,
+                endereco: client.endereco,
+                numero: client.numero,
+                bairro: client.bairro,
+                cidade: client.cidade,
+                estado: client.estado,
+                cep: client.cep || ''
             },
+            PaymentMethod: req.body.PaymentMethod,
             total: calculatedTotal
         });
 
@@ -112,7 +112,7 @@ exports.getOrdersByStore = async (req, res) => {
         }
 
         const orders = await Order.find({ storeId })
-            .select('status total createdAt cliente.nome cliente.telefone cliente.endereco cliente.numero cliente.bairro cliente.cidade cliente.estado cliente.cep items.idProduto items.descricao items.quantidade items.precoVenda data')
+            .select('status total createdAt client.nome client.telefone client.endereco client.numero client.bairro client.cidade client.estado client.cep items.idProduto items.descricao items.quantidade items.precoVenda data')
             .lean();
 
         if (!orders || orders.length === 0) {
