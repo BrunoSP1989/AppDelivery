@@ -18,7 +18,7 @@ exports.createProduct = async (req, res) => {
     }
 
     const operations = productsArray.map((item) => {
-      const { idProduto, descricao, precoVenda, estoque, unidade, fotoUrl } = item;
+      const { idProduto, descricao, precoCusto, precoVenda, estoque, unidade, fotoUrl } = item;
 
       return {
         updateOne: {
@@ -31,6 +31,7 @@ exports.createProduct = async (req, res) => {
           update: {
             $set: {
               descricao,
+              precoCusto,
               precoVenda,
               estoque,
               unidade,
@@ -71,15 +72,20 @@ exports.createProduct = async (req, res) => {
 exports.getProductsByStore = async (req, res) => {
   try {
     const { id: storeId } = req.user;
-    const products = await Product.find({ storeId: storeId });
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.max(1, Math.min(100, parseInt(req.query.limit, 10) || 10));
 
-    if (!products || products.length === 0) {
-      return res.status(404).json({ message: 'Nenhum produto encontrado para esta loja.' });
-    }
+    const options = {
+      page,
+      limit,
+      sort: { createdAt: -1 },
+      lean: true
+    };
 
-    return res.status(200).json(products);
-  }
-  catch (error) {
+    const result = await Product.paginate({ storeId }, options);
+
+    return res.status(200).json(result);
+  } catch (error) {
     console.error('Erro ao buscar produtos:', error);
 
     return res.status(500).json({

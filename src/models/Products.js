@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
 
 const ProductSchema = new mongoose.Schema({
 
@@ -14,6 +15,10 @@ const ProductSchema = new mongoose.Schema({
     descricao: {
         type: String,
         required: [true, 'A descrição é obrigatória.']
+    },
+    precoCusto: {
+        type: Number,
+        default: 0
     },
     precoVenda: {
         type: Number,
@@ -34,8 +39,8 @@ const ProductSchema = new mongoose.Schema({
         default: null
     }
 });
+ProductSchema.plugin(mongoosePaginate);
 ProductSchema.index({ storeId: 1, idProduto: 1 }, { unique: true });
-
 module.exports = mongoose.model('Product', ProductSchema, 'Product');
 
 
