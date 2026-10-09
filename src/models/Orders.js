@@ -22,16 +22,16 @@ const OrderSchema = new mongoose.Schema(
       required: true,
       index: true
     },
-    cliente: [{
-      nome: { type: String, required: true , trim: true},
-      telefone: { type: String, required: true , trim: true},
-      endereco: { type: String, required: true , trim: true},
-      numero: { type: String, required: true , trim: true},
-      bairro: { type: String, required: true , trim: true},
-      cidade: { type: String, required: true , trim: true},
-      estado: { type: String, required: true , trim: true},
+    cliente: {
+      nome: { type: String, required: true, trim: true },
+      telefone: { type: String, required: true, trim: true },
+      endereco: { type: String, required: true, trim: true },
+      numero: { type: String, required: true, trim: true },
+      bairro: { type: String, required: true, trim: true },
+      cidade: { type: String, required: true, trim: true },
+      estado: { type: String, required: true, trim: true },
       cep: { type: String }
-    }],
+    },
     items: [
       {
         idProduto: { type: String, required: true },

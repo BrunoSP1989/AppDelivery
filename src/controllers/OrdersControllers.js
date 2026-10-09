@@ -8,10 +8,10 @@ exports.createPublicOrder = async (req, res) => {
         const { storeId, items, cliente } = req.body;
 
         if (!storeId || !Array.isArray(items) || items.length === 0 || !Array.isArray(cliente)
-            || cliente.length === 0 || !cliente[0].nome
-            || !cliente[0].telefone || !cliente[0].endereco
-            || !cliente[0].numero || !cliente[0].bairro
-            || !cliente[0].cidade || !cliente[0].estado) {
+            || cliente.length === 0 || !cliente.nome
+            || !cliente.telefone || !cliente.endereco
+            || !cliente.numero || !cliente.bairro
+            || !cliente.cidade || !cliente.estado) {
             return res.status(400).json({ message: 'Dados incompletos.' });
         }
 
@@ -80,7 +80,16 @@ exports.createPublicOrder = async (req, res) => {
             storeId: store.id,
             idCliente: store.idCliente,
             items: orderItems,
-            cliente: cliente,
+            cliente: {
+                nome: cliente.nome,
+                telefone: cliente.telefone,
+                endereco: cliente.endereco,
+                numero: cliente.numero,
+                bairro: cliente.bairro,
+                cidade: cliente.cidade,
+                estado: cliente.estado,
+                cep: cliente.cep || ''
+            },
             total: calculatedTotal
         });
 
