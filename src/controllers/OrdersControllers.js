@@ -111,15 +111,24 @@ exports.getOrdersByStore = async (req, res) => {
             return res.status(400).json({ message: 'ID da loja não fornecido.' });
         }
 
-        const orders = await Order.find({ storeId })
-            .select('status total createdAt client.nome client.telefone client.endereco client.numero client.bairro client.cidade client.estado client.cep items.idProduto items.descricao items.quantidade items.precoVenda data')
-            .lean();
+        const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+        const limit = Math.max(1, Math.min(100, parseInt(req.query.limit, 10) || 10));
 
-        if (!orders || orders.length === 0) {
+        const options = {
+            page,
+            limit,
+            sort: { createdAt: -1 }, // Mais recentes primeiro
+            select: 'status total createdAt client.nome client.telefone client.endereco client.numero client.bairro client.cidade client.estado client.cep items.idProduto items.descricao items.quantidade items.precoVenda data',
+            lean: true
+        };
+
+        const result = await Order.paginate({ storeId }, options);
+
+        if (!result.docs || result.docs.length === 0) {
             return res.status(404).json({ message: 'Nenhum pedido encontrado para esta loja.' });
         }
 
-        return res.status(200).json(orders);
+        return res.status(200).json(result);
     } catch (error) {
         console.error('Erro ao buscar pedidos:', error);
         return res.status(500).json({

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
 
 const getPtBrDate = () => {
   return new Intl.DateTimeFormat('pt-BR', {
@@ -41,7 +42,7 @@ const OrderSchema = new mongoose.Schema(
       }
     ],
     PaymentMethod: {
-      type: String, enum: ['DINHEIRO', 'CARTAO_CREDITO','CARTAO_DEBITO','TICKET', 'PIX'], required: true
+      type: String, enum: ['DINHEIRO', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'TICKET', 'PIX'], required: true
     },
     total: { type: Number, required: true },
     status: {
@@ -53,5 +54,6 @@ const OrderSchema = new mongoose.Schema(
   }
 
 );
+OrderSchema.plugin(mongoosePaginate);
 OrderSchema.index({ storeId: 1, status: 1 });
 module.exports = mongoose.model('Order', OrderSchema, 'Orders');
