@@ -1,6 +1,11 @@
 const Stores = require('../models/Stores');
 const Product = require('../models/Products');
 
+const roundToTwoDecimals = (valor) => {
+  if (valor === undefined || valor === null || isNaN(valor)) return 0;
+  return Math.round((Number(valor) + Number.EPSILON) * 100) / 100;
+};
+
 exports.createProduct = async (req, res) => {
   try {
     const productsArray = req.body;
@@ -31,8 +36,8 @@ exports.createProduct = async (req, res) => {
           update: {
             $set: {
               descricao,
-              precoCusto,
-              precoVenda,
+              precoCusto: roundToTwoDecimals(precoCusto),
+              precoVenda: roundToTwoDecimals(precoVenda),
               estoque,
               unidade,
               fotoUrl,

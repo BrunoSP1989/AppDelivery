@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate-v2');
 
+const roundToTwoDecimals = (valor) => {
+    if (valor === undefined || valor === null) return valor;
+    return Math.round((Number(valor) + Number.EPSILON) * 100) / 100;
+};
+
 const ProductSchema = new mongoose.Schema({
 
     storeId: {
@@ -18,12 +23,14 @@ const ProductSchema = new mongoose.Schema({
     },
     precoCusto: {
         type: Number,
-        default: 0
+        default: 0.0,
+        set: roundToTwoDecimals
     },
     precoVenda: {
         type: Number,
         required: [true, 'O preço de venda é obrigatório.'],
-        default: 0
+        default: 0.0,
+        set: roundToTwoDecimals
     },
     estoque: {
         type: Number,
