@@ -44,6 +44,10 @@ const ProductSchema = new mongoose.Schema({
     fotoUrl: {
         type: String,
         default: null
+    },
+    active:{
+        type: Boolean,
+        default: true
     }
 });
 ProductSchema.plugin(mongoosePaginate);

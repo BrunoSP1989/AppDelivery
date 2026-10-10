@@ -2,8 +2,8 @@ const Stores = require('../models/Stores');
 const Product = require('../models/Products');
 
 const roundToTwoDecimals = (valor) => {
-  if (valor === undefined || valor === null || isNaN(valor)) return 0;
-  return Math.round((Number(valor) + Number.EPSILON) * 100) / 100;
+  const num = Number(valor);
+  return isNaN(num) ? 0 : Math.round(num * 100) / 100;
 };
 
 exports.createProduct = async (req, res) => {
@@ -44,8 +44,7 @@ exports.createProduct = async (req, res) => {
             },
 
             $setOnInsert: {
-              storeId: storeId,
-              idProduto: idProduto,
+              active:true
             },
           },
           upsert: true,
