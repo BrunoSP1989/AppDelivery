@@ -44,7 +44,7 @@ exports.createProduct = async (req, res) => {
             },
 
             $setOnInsert: {
-              active:true
+              active: true
             },
           },
           upsert: true,
@@ -75,7 +75,15 @@ exports.createProduct = async (req, res) => {
 
 exports.getProductsByStore = async (req, res) => {
   try {
-    const { id: storeId } = req.user;
+    const slug = req.params.slug?.trim().toLowerCase();
+
+    if (!slug) {
+      return res.status(400).json({ message: 'Slug da loja não informado.' });
+    }
+    const store = await Stores.findOne({ slug, active: true }).select('_id name').lean();
+    if (!store) {
+      return res.status(404).json({ message: 'Loja não encontrada ou inativa.' });
+    }
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.max(1, Math.min(100, parseInt(req.query.limit, 10) || 10));
 
@@ -86,15 +94,21 @@ exports.getProductsByStore = async (req, res) => {
       lean: true
     };
 
-    const result = await Product.paginate({ storeId }, options);
+    const query = {
+      store: store.id,
+      active: true
+    };
 
-    return res.status(200).json(result);
+    const result = await Product.paginate(query, options);
+
+    return res.status(200).json({
+      store: { id: store.id, name: store.name },
+      ...result
+    });
   } catch (error) {
-    console.error('Erro ao buscar produtos:', error);
-
+    console.error('Erro ao buscar produtos da loja:', error);
     return res.status(500).json({
-      message: 'Erro interno ao buscar os produtos.',
-      details: error.message
+      message: 'Erro interno ao buscar os produtos.'
     });
   }
 };
