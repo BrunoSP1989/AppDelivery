@@ -55,13 +55,18 @@ exports.registerStore = async (req, res) => {
   }
 };
 
-exports.getStoresById = async (req, res) => {
+exports.getStoreBySlug = async (req, res) => {
   try {
-    const { idCliente } = req.params;
-    const store = await Store.findOne({ idCliente });
+    const slug = req.params.slug?.trim().toLowerCase();
+
+    if (!slug) {
+      return res.status(400).json({ message: 'Slug não informado.' });
+    }
+    const store = await Store.findOne({ slug }).lean();
     if (!store) {
       return res.status(404).json({ message: 'Loja não encontrada.' });
     }
+
     return res.status(200).json({
       store: {
         id: store._id,

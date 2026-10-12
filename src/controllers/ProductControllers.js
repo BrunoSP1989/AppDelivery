@@ -80,7 +80,7 @@ exports.getProductsByStore = async (req, res) => {
     if (!slug) {
       return res.status(400).json({ message: 'Slug da loja não informado.' });
     }
-    const store = await Stores.findOne({ slug, active: true }).select('_id name').lean();
+    const store = await Stores.findOne({ slug, active: true }).lean();
     if (!store) {
       return res.status(404).json({ message: 'Loja não encontrada ou inativa.' });
     }
