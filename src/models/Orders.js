@@ -44,6 +44,12 @@ const OrderSchema = new mongoose.Schema(
     PaymentMethod: {
       type: String, enum: ['DINHEIRO', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'TICKET', 'PIX'], required: true
     },
+    motoboyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'MotoBoys',
+      default: null,
+      index: true
+    },
     total: { type: Number, required: true },
     status: {
       type: String,

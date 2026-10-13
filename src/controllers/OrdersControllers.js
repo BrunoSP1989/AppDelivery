@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Store = require('../models/Stores');
 const Product = require('../models/Products');
 const Order = require('../models/Orders');
+const MotoBoys = require('../models/MotoBoys');
 
 exports.createPublicOrder = async (req, res) => {
     try {
@@ -133,6 +134,45 @@ exports.getOrdersByStore = async (req, res) => {
         console.error('Erro ao buscar pedidos:', error);
         return res.status(500).json({
             message: 'Erro ao buscar pedidos.',
+            error: error.message
+        });
+    }
+};
+exports.assignMotoBoyToOrder = async (req, res) => {
+    try {
+        const { id: storeId } = req.user;
+        const { orderId } = req.params;
+        const { motoboyId } = req.body;
+        console.log(orderId);
+        console.log(motoboyId);
+        const motoboy = await MotoBoys.findOne({ _id: motoboyId, storeId });
+        if (!motoboy) {
+            return res.status(404).json({ message: 'Motoboy não encontrado para esta loja.' });
+        }
+        const updatedOrder = await Order.findOneAndUpdate(
+            { _id: orderId, storeId },
+            {
+                $set: {
+                    motoboyId: motoboy._id,
+                    status: 'EM ROTA'
+                }
+            },
+            { new: true }
+        );
+
+        if (!updatedOrder) {
+            return res.status(404).json({ message: 'Pedido não encontrado para esta loja.' });
+        }
+
+        return res.status(200).json({
+            message: 'Motoboy vinculado ao pedido com sucesso!',
+            order: updatedOrder
+        });
+
+    } catch (error) {
+        console.error('Erro ao vincular motoboy ao pedido:', error);
+        return res.status(500).json({
+            message: 'Erro interno ao vincular motoboy ao pedido.',
             error: error.message
         });
     }
