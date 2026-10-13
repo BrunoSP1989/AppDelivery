@@ -7,4 +7,6 @@ const { authMiddleware } = require('../middlewares/authMiddleware');
 router.post('/create-product', authMiddleware, ProductController.createProduct);
 // Rota para buscar os produtos da loja
 router.get('/:slug/products', ProductController.getProductsByStore);
+// Rota para gravar o link da foto
+router.patch('/photo', authMiddleware, ProductController.updateProductPhoto);
 module.exports = router;

@@ -5,6 +5,8 @@ const AdminRoutes = require('./src/routes/AdminRoutes');
 const ProductsRoutes = require('./src/routes/ProductsRoutes');
 const StoreRoutes = require('./src/routes/StoresRoutes');
 const OrdersRoutes = require('./src/routes/OrdersRoutes');
+const UploadRoutes = require('./src/routes/UploadRoutes');
+
 const app = express();
 require('dotenv').config();
 
@@ -20,6 +22,7 @@ app.use('/', AdminRoutes);
 app.use('/', ProductsRoutes);
 app.use('/', StoreRoutes);
 app.use('/', OrdersRoutes);
+app.use('/', UploadRoutes);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

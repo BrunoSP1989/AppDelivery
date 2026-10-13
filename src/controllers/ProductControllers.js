@@ -112,3 +112,44 @@ exports.getProductsByStore = async (req, res) => {
     });
   }
 };
+
+exports.updateProductPhoto = async (req, res) => {
+  try {
+    const { id: storeId } = req.user;
+    const { idProduto, fotoUrl } = req.body;
+
+    if (!idProduto || !fotoUrl) {
+      return res.status(400).json({
+        message: 'idProduto e fotoUrl são obrigatórios.'
+      });
+    }
+
+    const produtoAtualizado = await Product.findOneAndUpdate(
+      {
+        storeId,
+        idProduto: String(idProduto)
+      },
+      {
+        $set: { fotoUrl }
+      },
+      { new: true }
+    );
+    
+    if (!produtoAtualizado) {
+      return res.status(404).json({
+        message: `Produto com ID ${idProduto} não encontrado para esta loja.`
+      });
+    }
+
+    return res.status(200).json({
+      message: 'Foto do produto atualizada com sucesso!',
+      produto: produtoAtualizado
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar foto do produto:', error);
+    return res.status(500).json({
+      message: 'Erro interno ao atualizar a foto do produto.',
+      error: error.message
+    });
+  }
+};
