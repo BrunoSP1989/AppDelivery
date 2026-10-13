@@ -1,20 +1,20 @@
 const mongoose = require('mongoose');
 
 const storeSchema = new mongoose.Schema({
-  email: { 
-    type: String, 
-    required: true, 
-    unique: true 
+  email: {
+    type: String,
+    required: true,
+    unique: true
   },
-  cnpj:{
+  cnpj: {
     type: String,
     required: true
   },
-  idCliente:{
+  idCliente: {
     type: String,
     required: true
   },
-  fantasia:{
+  fantasia: {
     type: String,
     required: true
   },
@@ -22,26 +22,32 @@ const storeSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  password: { 
-    type: String, 
-    required: true 
-  },
-  passwordSync:{
+  password: {
     type: String,
     required: true
   },
-  active:{
+  passwordSync: {
+    type: String,
+    required: true
+  },
+  active: {
     type: Boolean,
     default: true
   },
-  slug:{
+  slug: {
     type: String,
     required: true,
   },
-  role: { 
-    type: String, 
-    enum: ['manager', 'admin'], 
-    default: 'manager' 
+  abertura: {
+    type: String
+  },
+  fechamento: {
+    type: String
+  },
+  role: {
+    type: String,
+    enum: ['manager', 'admin'],
+    default: 'manager'
   }
 });
 
