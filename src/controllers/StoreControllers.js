@@ -85,9 +85,10 @@ exports.getStoreBySlug = async (req, res) => {
 
 exports.updatePasswordStoreById = async (req, res) => {
   try {
-    const { idCliente } = req.params;
+    const { id: storeId } = req.user;
     const { oldpassword, password } = req.body;
-    const store = await Store.findOne({ idCliente });
+
+    const store = await Store.findById(storeId);
     if (!store) {
       return res.status(404).json({ message: 'Loja não encontrada.' });
     }
@@ -97,7 +98,7 @@ exports.updatePasswordStoreById = async (req, res) => {
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const updatedStore = await Store.findOneAndUpdate({ idCliente }, { password: hashedPassword }, { new: true });
+    const updatedStore = await Store.findByIdAndUpdate(storeId, { password: hashedPassword }, { new: true });
     if (!updatedStore) {
       return res.status(404).json({ message: 'Loja não encontrada.' });
     }
@@ -117,10 +118,10 @@ exports.updatePasswordStoreById = async (req, res) => {
 
 exports.updateStatusStore = async (req, res) => {
   try {
-    const { idCliente } = req.params;
+    const { id: storeId } = req.user;
     const { active } = req.body;
 
-    const updatedStore = await Store.findOneAndUpdate({ idCliente }, { $set: { active } }, { new: true });
+    const updatedStore = await Store.findByIdAndUpdate(storeId, { $set: { active } }, { new: true });
     if (!updatedStore) {
       return res.status(404).json({ message: 'Loja não encontrada.' });
     }
