@@ -143,9 +143,8 @@ exports.assignMotoBoyToOrder = async (req, res) => {
         const { id: storeId } = req.user;
         const { orderId } = req.params;
         const { motoboyId } = req.body;
-        console.log(orderId);
-        console.log(motoboyId);
         const motoboy = await MotoBoys.findOne({ _id: motoboyId, storeId });
+        console.log(motoboy);
         if (!motoboy) {
             return res.status(404).json({ message: 'Motoboy não encontrado para esta loja.' });
         }

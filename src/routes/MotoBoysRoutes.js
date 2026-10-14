@@ -6,5 +6,5 @@ const { authMiddleware } = require('../middlewares/authMiddleware');
 
 router.post('/store/register-motoboy', authMiddleware, MotoBoysControllers.registerMotoBoyByStore);
 router.get('/:slug/motoboys', authMiddleware, MotoBoysControllers.getMotoBoyByStore);
-router.patch('/orders/:orderId/motoboy', authMiddleware, orderController.assignMotoBoyToOrder);
+router.patch('/orders/:orderId/motoboy', authMiddleware, OrdersControllers.assignMotoBoyToOrder);
 module.exports = router;
