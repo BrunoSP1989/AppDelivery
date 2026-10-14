@@ -92,38 +92,32 @@ exports.getMotoBoysCommissionByStore = async (req, res) => {
         }
 
         const relatorioComissoes = await Orders.aggregate([
-            // 1. FILTRO: Garante que só vamos calcular pedidos DESTA loja específica
             {
                 $match: {
                     storeId: store._id
-                    // Se você tiver um status de pedido finalizado, adicione aqui, ex: status: "DELIVERED"
                 }
             },
 
-            // 2. Agrupa os pedidos por entregador e conta o total
             {
                 $group: {
-                    _id: "$motoboyId", // Verifica se no seu Schema de Orders o campo chama 'entregadorId'
+                    _id: "$motoboyId",
                     totalPedidos: { $sum: 1 }
                 }
             },
 
-            // 3. Busca os dados do entregador na coleção correspondente ao model 'MotoBoys'
             {
                 $lookup: {
-                    from: "MotoBoys", // ATENÇÃO: Nome da coleção do model MotoBoys no banco (geralmente minúsculo e plural)
+                    from: "MotoBoys",
                     localField: "_id",
                     foreignField: "_id",
                     as: "dadosEntregador"
                 }
             },
 
-            // 4. Desestrutura a array do lookup
             {
                 $unwind: "$dadosEntregador"
             },
 
-            // 5. Faz o cálculo final ajustado com os nomes dos campos do seu Schema (name e commission)
             {
                 $project: {
                     _id: 0,
@@ -138,7 +132,6 @@ exports.getMotoBoysCommissionByStore = async (req, res) => {
             }
         ]);
 
-        // RETORNO: Agora sim devolvendo o relatório com os cálculos prontos
         return res.status(200).json(relatorioComissoes);
 
     } catch (error) {
