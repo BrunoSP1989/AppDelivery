@@ -76,6 +76,7 @@ exports.createProduct = async (req, res) => {
 exports.getProductsByStore = async (req, res) => {
   try {
     const slug = req.params.slug?.trim().toLowerCase();
+    const { search } = req.query;
 
     if (!slug) {
       return res.status(400).json({ message: 'Slug da loja não informado.' });
@@ -96,8 +97,13 @@ exports.getProductsByStore = async (req, res) => {
 
     const query = {
       store: store.id,
-      active: true
+      active: true,
     };
+    if (search) {
+      query.$or = [
+        { descricao: { $regex: search, $options: 'i' } }
+      ];
+    }
 
     const result = await Product.paginate(query, options);
 
@@ -134,7 +140,7 @@ exports.updateProductPhoto = async (req, res) => {
       },
       { new: true }
     );
-    
+
     if (!produtoAtualizado) {
       return res.status(404).json({
         message: `Produto com ID ${idProduto} não encontrado para esta loja.`
