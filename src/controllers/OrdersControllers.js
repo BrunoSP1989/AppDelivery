@@ -3,6 +3,7 @@ const Store = require('../models/Stores');
 const Product = require('../models/Products');
 const Order = require('../models/Orders');
 const MotoBoys = require('../models/MotoBoys');
+const MOTOBOY_POPULATE_FIELDS = 'name commission active';
 
 exports.createPublicOrder = async (req, res) => {
     try {
@@ -108,28 +109,35 @@ exports.createPublicOrder = async (req, res) => {
 exports.getOrdersByStore = async (req, res) => {
     try {
         const { id: storeId } = req.user;
-        if (!storeId) {
-            return res.status(400).json({ message: 'ID da loja não fornecido.' });
+        if (!storeId || !mongoose.Types.ObjectId.isValid(storeId)) {
+            return res.status(400).json({ message: 'ID da loja inválido ou ausente.' });
         }
 
         const page = Math.max(1, parseInt(req.query.page, 10) || 1);
         const limit = Math.max(1, Math.min(100, parseInt(req.query.limit, 10) || 10));
+        const { status } = req.query;
+
+        const query = { storeId };
+        if (status) {
+            query.status = status;
+        }
 
         const options = {
             page,
             limit,
-            sort: { createdAt: -1 }, // Mais recentes primeiro
-            select: 'status total createdAt client.nome client.telefone client.endereco client.numero client.bairro client.cidade client.estado client.cep items.idProduto items.descricao items.quantidade items.precoVenda data',
+            sort: { _id: -1 },
+            // motoboyId adicionado ao final do select
+            select: 'status total createdAt client.nome client.telefone client.endereco client.numero client.bairro client.cidade client.estado client.cep items.idProduto items.descricao items.quantidade items.precoVenda data motoboyId',
+            populate: {
+                path: 'motoboyId',
+                select: MOTOBOY_POPULATE_FIELDS // Garanta que MOTOBOY_POPULATE_FIELDS tenha os campos desejados (ex: 'name telefone')
+            },
             lean: true
         };
 
-        const result = await Order.paginate({ storeId }, options);
-
-        if (!result.docs || result.docs.length === 0) {
-            return res.status(404).json({ message: 'Nenhum pedido encontrado para esta loja.' });
-        }
-
+        const result = await Order.paginate(query, options);
         return res.status(200).json(result);
+
     } catch (error) {
         console.error('Erro ao buscar pedidos:', error);
         return res.status(500).json({
@@ -138,17 +146,32 @@ exports.getOrdersByStore = async (req, res) => {
         });
     }
 };
+
 exports.assignMotoBoyToOrder = async (req, res) => {
     try {
         const { id: storeId } = req.user;
         const { orderId } = req.params;
         const { motoboyId } = req.body;
-        const motoboy = await MotoBoys.findOne({ _id: motoboyId, storeId });
-        if (!motoboy) {
-            return res.status(404).json({ message: 'Motoboy não encontrado para esta loja.' });
+
+        if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(motoboyId)) {
+            return res.status(400).json({ message: 'Identificador de pedido ou motoboy inválido.' });
         }
+
+        // Valida se o motoboy pertence à loja e se está ATIVO
+        const motoboy = await MotoBoys.findOne({ _id: motoboyId, storeId, active: true });
+        if (!motoboy) {
+            return res.status(404).json({
+                message: 'Motoboy não encontrado ou inativo para esta loja.'
+            });
+        }
+
+        // Associa apenas se o pedido estiver PENDENTE
         const updatedOrder = await Order.findOneAndUpdate(
-            { _id: orderId, storeId },
+            {
+                _id: orderId,
+                storeId,
+                status: 'PENDENTE'
+            },
             {
                 $set: {
                     motoboyId: motoboy._id,
@@ -156,10 +179,12 @@ exports.assignMotoBoyToOrder = async (req, res) => {
                 }
             },
             { new: true }
-        );
+        ).populate('motoboyId', MOTOBOY_POPULATE_FIELDS);
 
         if (!updatedOrder) {
-            return res.status(404).json({ message: 'Pedido não encontrado para esta loja.' });
+            return res.status(404).json({
+                message: 'Pedido não encontrado ou não está elegível para despacho (status deve ser PENDENTE).'
+            });
         }
 
         return res.status(200).json({
