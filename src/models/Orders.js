@@ -46,7 +46,7 @@ const OrderSchema = new mongoose.Schema(
     },
     motoboyId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'MotoBoy',
+      ref: 'MotoBoys',
       default: null,
       index: true
     },

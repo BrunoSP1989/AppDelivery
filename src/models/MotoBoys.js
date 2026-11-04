@@ -37,4 +37,4 @@ const motoboySchema = new mongoose.Schema(
 
 motoboySchema.index({ storeId: 1, active: 1 });
 
-module.exports = mongoose.model('MotoBoy', motoboySchema, 'MotoBoys');
+module.exports = mongoose.model('MotoBoys', motoboySchema, 'MotoBoys');
