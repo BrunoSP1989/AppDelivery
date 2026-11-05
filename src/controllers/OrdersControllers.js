@@ -3,7 +3,6 @@ const Store = require('../models/Stores');
 const Product = require('../models/Products');
 const Order = require('../models/Orders');
 const MotoBoys = require('../models/MotoBoys');
-const MOTOBOY_POPULATE_FIELDS = 'name commission active';
 
 exports.createPublicOrder = async (req, res) => {
     try {
@@ -15,7 +14,9 @@ exports.createPublicOrder = async (req, res) => {
             || !client.cidade || !client.estado || !PaymentMethod) {
             return res.status(400).json({ message: 'Dados incompletos.' });
         }
-
+        if (!mongoose.Types.ObjectId.isValid(storeId)) {
+            return res.status(400).json({ message: 'Loja inválida.' });
+        }
         const store = await Store.findById(storeId);
         if (!store) {
             return res.status(404).json({ message: 'Loja não encontrada.' });
@@ -36,16 +37,21 @@ exports.createPublicOrder = async (req, res) => {
         const bulkOperations = [];
 
         for (const item of items) {
-            const idStr = String(item.idProduto);
+            const idString = String(item.idProduto);
             const qtdComprada = Number(item.quantidade);
-            const produto = mapaProdutos.get(idStr);
+            const produto = mapaProdutos.get(idString);
 
             if (!produto) {
                 return res.status(404).json({
                     message: `Produto não encontrado: ID ${item.idProduto}`
                 });
             }
-
+            const qtdValida = Number.isFinite(qtdComprada) && qtdComprada > 0;
+            if (!qtdValida) {
+                return res.status(400).json({
+                    message: `Quantidade inválida para o produto ID ${item.idProduto} (${produto.descricao}).`
+                });
+            }
             const precoUnit = Number(produto.precoVenda);
             if (produto.precoVenda === undefined || produto.precoVenda === null || isNaN(precoUnit)) {
                 return res.status(400).json({
@@ -66,7 +72,7 @@ exports.createPublicOrder = async (req, res) => {
                 updateOne: {
                     filter: {
                         storeId: store.id,
-                        idProduto: idStr
+                        idProduto: idString
                     },
                     update: {
                         $inc: { estoque: -qtdComprada }
@@ -74,8 +80,6 @@ exports.createPublicOrder = async (req, res) => {
                 }
             });
         }
-
-        await Product.bulkWrite(bulkOperations, { ordered: false });
 
         const newOrder = await Order.create({
             storeId: store.id,
@@ -94,6 +98,23 @@ exports.createPublicOrder = async (req, res) => {
             PaymentMethod: req.body.PaymentMethod,
             total: calculatedTotal
         });
+
+        try {
+            const resultado = await Product.bulkWrite(bulkOperations, { ordered: false });
+
+            if (resultado.matchedCount !== bulkOperations.length) {
+                console.error(
+                    `Baixa divergente no pedido ${newOrder._id}: ` +
+                    `esperado ${bulkOperations.length}, encontrado ${resultado.matchedCount}`
+                );
+            }
+        } catch (erro) {
+            console.error(
+                `Falha na baixa de estoque do pedido ${newOrder._id}. ` +
+                `Aplicadas: ${erro.result?.modifiedCount ?? 'desconhecido'} de ${bulkOperations.length}`,
+                erro
+            );
+        }
 
         return res.status(201).json(newOrder);
 
@@ -126,11 +147,10 @@ exports.getOrdersByStore = async (req, res) => {
             page,
             limit,
             sort: { _id: -1 },
-            // motoboyId adicionado ao final do select
             select: 'status total createdAt client.nome client.telefone client.endereco client.numero client.bairro client.cidade client.estado client.cep items.idProduto items.descricao items.quantidade items.precoVenda data motoboyId',
             populate: {
                 path: 'motoboyId',
-                select: MOTOBOY_POPULATE_FIELDS // Garanta que MOTOBOY_POPULATE_FIELDS tenha os campos desejados (ex: 'name telefone')
+                select: 'name commission active'
             },
             lean: true
         };
@@ -157,15 +177,12 @@ exports.assignMotoBoyToOrder = async (req, res) => {
             return res.status(400).json({ message: 'Identificador de pedido ou motoboy inválido.' });
         }
 
-        // Valida se o motoboy pertence à loja e se está ATIVO
         const motoboy = await MotoBoys.findOne({ _id: motoboyId, storeId, active: true });
         if (!motoboy) {
             return res.status(404).json({
                 message: 'Motoboy não encontrado ou inativo para esta loja.'
             });
         }
-
-        // Associa apenas se o pedido estiver PENDENTE
         const updatedOrder = await Order.findOneAndUpdate(
             {
                 _id: orderId,
@@ -179,7 +196,7 @@ exports.assignMotoBoyToOrder = async (req, res) => {
                 }
             },
             { new: true }
-        ).populate('motoboyId', MOTOBOY_POPULATE_FIELDS);
+        ).populate('motoboyId', 'name commission active');
 
         if (!updatedOrder) {
             return res.status(404).json({
