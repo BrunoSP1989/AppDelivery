@@ -17,7 +17,7 @@ exports.createPublicOrder = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(storeId)) {
             return res.status(400).json({ message: 'Loja inválida.' });
         }
-        const store = await Store.findById(storeId).lean();
+        const store = await Store.findById(storeId);
         if (!store) {
             return res.status(404).json({ message: 'Loja não encontrada.' });
         }
@@ -31,7 +31,6 @@ exports.createPublicOrder = async (req, res) => {
         const mapaProdutos = new Map(
             produtosCadastrados.map((prod) => [prod.idProduto, prod])
         );
-
         let calculatedTotal = 0;
         const orderItems = [];
         const bulkOperations = [];
@@ -196,7 +195,7 @@ exports.assignMotoBoyToOrder = async (req, res) => {
                 }
             },
             { new: true }
-        ).populate('motoboyId', 'name commission active').lean();
+        ).populate('motoboyId', 'name commission active');
 
         if (!updatedOrder) {
             return res.status(404).json({
