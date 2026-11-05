@@ -38,7 +38,7 @@ exports.createProduct = async (req, res) => {
               descricao,
               precoCusto: roundToTwoDecimals(precoCusto),
               precoVenda: roundToTwoDecimals(precoVenda),
-              estoque,
+              estoque: roundToTwoDecimals(estoque),
               unidade,
               fotoUrl,
             },
