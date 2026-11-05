@@ -17,7 +17,7 @@ exports.createPublicOrder = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(storeId)) {
             return res.status(400).json({ message: 'Loja inválida.' });
         }
-        const store = await Store.findById(storeId);
+        const store = await Store.findById(storeId).lean();
         if (!store) {
             return res.status(404).json({ message: 'Loja não encontrada.' });
         }
@@ -177,7 +177,7 @@ exports.assignMotoBoyToOrder = async (req, res) => {
             return res.status(400).json({ message: 'Identificador de pedido ou motoboy inválido.' });
         }
 
-        const motoboy = await MotoBoys.findOne({ _id: motoboyId, storeId, active: true });
+        const motoboy = await MotoBoys.findOne({ _id: motoboyId, storeId, active: true }).lean();
         if (!motoboy) {
             return res.status(404).json({
                 message: 'Motoboy não encontrado ou inativo para esta loja.'
@@ -196,7 +196,7 @@ exports.assignMotoBoyToOrder = async (req, res) => {
                 }
             },
             { new: true }
-        ).populate('motoboyId', 'name commission active');
+        ).populate('motoboyId', 'name commission active').lean();
 
         if (!updatedOrder) {
             return res.status(404).json({
