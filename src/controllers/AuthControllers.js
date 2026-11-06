@@ -7,6 +7,15 @@ require('dotenv').config();
 
 const JWT_SECRET = process.env.JWT_SECRET
 const JWT_REFRESHSECRET = process.env.JWT_REFRESHSECRET
+const isProd = process.env.NODE_ENV === 'production';
+
+const setAuthCookies = (res, token, refreshToken) => {
+    const base = { httpOnly: true, secure: isProd, sameSite: 'lax', path: '/' };
+    res.cookie('access_token', token, { ...base, maxAge: 30 * 60 * 1000 });
+    if (refreshToken) {
+        res.cookie('refresh_token', refreshToken, { ...base, maxAge: 7 * 24 * 60 * 60 * 1000 });
+    }
+};
 
 exports.login = async (req, res) => {
     try {
@@ -22,20 +31,16 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'E-mail ou senha inválidos' });
         }
 
-        const token = jwt.sign(
-            { id: store._id, role: store.role },
-            JWT_SECRET,
-            { expiresIn: '30m' }
-        );
-        const refreshToken = jwt.sign(
-            { id: store._id },
-            JWT_REFRESHSECRET,
-            { expiresIn: '7d' }
-        );
+        const token = jwt.sign({ id: store._id, role: store.role }, JWT_SECRET, { expiresIn: '30m' });
+
+        const refreshToken = jwt.sign({ id: store._id }, JWT_REFRESHSECRET, { expiresIn: '7d' });
+
         await refreshtoken.create({
             refreshToken: refreshToken,
             storeId: store._id
         });
+
+        setAuthCookies(res, token, refreshToken);
 
         return res.status(200).json({
             token,
@@ -80,6 +85,7 @@ exports.loginAdmin = async (req, res) => {
             refreshToken: refreshToken,
             storeId: admin._id
         });
+        setAuthCookies(res, token, refreshToken);
 
         return res.status(200).json({
             token,
@@ -98,7 +104,7 @@ exports.loginAdmin = async (req, res) => {
 };
 exports.refreshToken = async (req, res) => {
     try {
-        const { refreshToken } = req.body;
+        const refreshToken = req.body?.refreshToken || req.cookies?.refresh_token;
 
         if (!refreshToken) return res.status(401).json({ message: 'Refresh Token é obrigatório' });
 
@@ -119,6 +125,7 @@ exports.refreshToken = async (req, res) => {
                 JWT_SECRET,
                 { expiresIn: '30m' }
             );
+            setAuthCookies(res, newAccessToken);
 
             return res.status(200).json({ accessToken: newAccessToken });
         });
@@ -129,7 +136,7 @@ exports.refreshToken = async (req, res) => {
 };
 exports.refreshTokenAdmin = async (req, res) => {
     try {
-        const { refreshToken } = req.body;
+        const refreshToken = req.body?.refreshToken || req.cookies?.refresh_token;
 
         if (!refreshToken) return res.status(401).json({ message: 'Refresh Token é obrigatório' });
 
@@ -150,6 +157,7 @@ exports.refreshTokenAdmin = async (req, res) => {
                 JWT_SECRET,
                 { expiresIn: '30m' }
             );
+            setAuthCookies(res, newAccessToken);
 
             return res.status(200).json({ accessToken: newAccessToken });
         });
@@ -203,7 +211,14 @@ exports.loginWithCnpj = async (req, res) => {
         return res.status(500).json({ message: 'Erro interno no servidor' });
     }
 };
+exports.logout = async (req, res) => {
+    const refreshToken = req.body?.refreshToken || req.cookies?.refresh_token;
+    if (refreshToken) await refreshtoken.deleteOne({ refreshToken });
 
+    res.clearCookie('access_token', { path: '/' });
+    res.clearCookie('refresh_token', { path: '/' });
+    return res.status(200).json({ message: 'Logout realizado' });
+};
 
 
 

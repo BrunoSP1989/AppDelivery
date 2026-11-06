@@ -8,11 +8,13 @@ const OrdersRoutes = require('./src/routes/OrdersRoutes');
 const UploadRoutes = require('./src/routes/UploadRoutes');
 const MotoBoysRoutes = require('./src/routes/MotoBoysRoutes');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 require('dotenv').config();
 app.use(cors());
-
+app.use(cookieParser());
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 app.use(express.json({ limit: '5mb' }));
 
 

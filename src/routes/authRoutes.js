@@ -8,5 +8,7 @@ router.post('/login', AuthController.login);
 router.post('/login-cnpj', AuthController.loginWithCnpj);
 // Rota do Refresh Token
 router.post('/refresh-token', AuthController.refreshToken);
+//rota para fazer lougout
+router.post('/logout', AuthController.logout);
 
 module.exports = router;
