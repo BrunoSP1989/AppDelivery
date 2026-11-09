@@ -43,8 +43,6 @@ exports.login = async (req, res) => {
         setAuthCookies(res, token, refreshToken);
 
         return res.status(200).json({
-            token,
-            refreshToken,
             store: {
                 id: store._id,
                 email: store.email,
@@ -88,8 +86,6 @@ exports.loginAdmin = async (req, res) => {
         setAuthCookies(res, token, refreshToken);
 
         return res.status(200).json({
-            token,
-            refreshToken,
             admin: {
                 id: admin._id,
                 email: admin.email,
@@ -126,8 +122,7 @@ exports.refreshToken = async (req, res) => {
                 { expiresIn: '30m' }
             );
             setAuthCookies(res, newAccessToken);
-
-            return res.status(200).json({ accessToken: newAccessToken });
+            return res.status(200).json({ message: 'Token renovado' });
         });
 
     } catch (error) {
@@ -158,8 +153,7 @@ exports.refreshTokenAdmin = async (req, res) => {
                 { expiresIn: '30m' }
             );
             setAuthCookies(res, newAccessToken);
-
-            return res.status(200).json({ accessToken: newAccessToken });
+            return res.status(200).json({ message: 'Token renovado' });
         });
 
     } catch (error) {
