@@ -213,4 +213,15 @@ exports.logout = async (req, res) => {
     res.clearCookie('refresh_token', { path: '/' });
     return res.status(200).json({ message: 'Logout realizado' });
 };
-
+exports.getMe = async (req, res) => {
+    try {
+        const store = await Stores.findById(req.user.id).select('-password -passwordSync');
+        if (!store) {
+            return res.status(404).json({ message: 'Loja não encontrada' });
+        }
+        return res.status(200).json({ store });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Erro interno no servidor' });
+    }
+};
